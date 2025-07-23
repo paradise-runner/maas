@@ -1,10 +1,10 @@
-# Maas - Mac as a Server
+# MaaS - Mac as a Server
 
 A modern web interface for monitoring and managing macOS system services via `launchctl`. Built with Next.js, React, and SQLite for local service label management.
 
 ## Overview
 
-Maas provides a clean, intuitive web interface to view and filter macOS system services (daemons and agents) managed by `launchctl`. Instead of running terminal commands, you can:
+MaaS provides a clean, intuitive web interface to view and filter macOS system services (daemons and agents) managed by `launchctl`. Instead of running terminal commands, you can:
 
 - View all running and stopped services in a table format
 - Search services by name, PID, or status
@@ -14,25 +14,25 @@ Maas provides a clean, intuitive web interface to view and filter macOS system s
 
 ## Features
 
-### 🔍 Service Monitoring
+### Service Monitoring
 - Real-time display of all `launchctl` services
 - Shows PID, status (Running/Stopped), and service labels
 - Live refresh functionality to update service states
 - Clean table interface with status indicators
 
-### 🏷️ Label Management
+### Label Management
 - Create custom labels to categorize services (e.g., "docker", "database", "web")
 - Filter services by one or multiple labels
 - Toggle between showing all services or only labeled ones
 - Persistent label storage using SQLite database
 
-### 🔎 Search & Filter
+### Search & Filter
 - Search services by name, PID, or status
 - Combine search with label filtering
 - Clear search and filter options
 - Real-time filtering as you type
 
-### 🎨 Modern UI
+### Modern UI
 - Responsive design that works on desktop and mobile
 - Dark mode support
 - Loading states and error handling

@@ -1,6 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { toast } from 'sonner';
+import { X, Copy, Sparkles, Settings, Tag, Folder, FileText, FolderOpen, Lightbulb, Play, RotateCcw, Download, Plus } from 'lucide-react';
 
 interface PlistGeneratorProps {
   isOpen: boolean;
@@ -140,246 +148,279 @@ export default function PlistGenerator({ isOpen, onClose }: PlistGeneratorProps)
   const copyInstallCommand = async () => {
     try {
       await navigator.clipboard.writeText(getInstallCommand());
-      alert('Installation command copied to clipboard!');
+      toast.success('Installation command copied to clipboard!');
     } catch (err) {
       console.error('Failed to copy command:', err);
+      toast.error('Failed to copy command to clipboard');
     }
   };
 
   const isValid = plistData.label && plistData.program;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Generate LaunchAgent Plist
-            </h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="pb-6 border-b">
+          <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent flex items-center gap-2">
+            <Sparkles className="h-8 w-8" /> Generate LaunchAgent Plist
+          </DialogTitle>
+          <p className="text-muted-foreground mt-2">
+            Create a macOS LaunchAgent configuration file for your service
+          </p>
+        </DialogHeader>
 
-        <div className="p-6 space-y-6">
-          {/* Basic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Service Label (Required) *
-              </label>
-              <input
-                type="text"
-                value={plistData.label}
-                onChange={(e) => setPlistData(prev => ({ ...prev, label: e.target.value }))}
-                placeholder="com.example.myservice"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Program Path (Required) *
-              </label>
-              <input
-                type="text"
-                value={plistData.program}
-                onChange={(e) => setPlistData(prev => ({ ...prev, program: e.target.value }))}
-                placeholder="/usr/local/bin/myprogram"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              />
+        <div className="space-y-8">
+          {/* Basic Info Section */}
+          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 rounded-xl p-6 border-2 border-purple-200 dark:border-slate-600">
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Settings className="h-6 w-6" /> Basic Configuration
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="service-label" className="text-sm font-semibold flex items-center gap-2">
+                  <Tag className="h-4 w-4" /> Service Label (Required) *
+                </Label>
+                <Input
+                  id="service-label"
+                  type="text"
+                  value={plistData.label}
+                  onChange={(e) => setPlistData(prev => ({ ...prev, label: e.target.value }))}
+                  placeholder="com.example.myservice"
+                  className="border-2 focus:border-purple-500 transition-all duration-300"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="program-path" className="text-sm font-semibold flex items-center gap-2">
+                  <Folder className="h-4 w-4" /> Program Path (Required) *
+                </Label>
+                <Input
+                  id="program-path"
+                  type="text"
+                  value={plistData.program}
+                  onChange={(e) => setPlistData(prev => ({ ...prev, program: e.target.value }))}
+                  placeholder="/usr/local/bin/myprogram"
+                  className="border-2 focus:border-purple-500 transition-all duration-300"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Program Arguments */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Program Arguments
-            </label>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                value={argumentInput}
-                onChange={(e) => setArgumentInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && addArgument()}
-                placeholder="--config /path/to/config"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              />
-              <button
-                onClick={addArgument}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Add
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {plistData.programArguments.map((arg, index) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+          {/* Program Arguments Section */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-600 rounded-xl p-6 border-2 border-blue-200 dark:border-slate-500">
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <FileText className="h-6 w-6" /> Program Arguments
+            </h3>
+            <div className="space-y-3">
+              <div className="flex gap-3">
+                <Input
+                  type="text"
+                  value={argumentInput}
+                  onChange={(e) => setArgumentInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && addArgument()}
+                  placeholder="--config /path/to/config"
+                  className="flex-1 border-2 focus:border-blue-500 transition-all duration-300"
+                />
+                <Button 
+                  onClick={addArgument} 
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md"
                 >
-                  {arg}
-                  <button
-                    onClick={() => removeArgument(index)}
-                    className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-100"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {plistData.programArguments.map((arg, index) => (
+                  <Badge key={index} variant="secondary" className="gap-2 text-sm py-1 px-3 bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-slate-600 dark:to-slate-500 border border-blue-300 dark:border-slate-400">
+                    {arg}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeArgument(index)}
+                      className="h-auto p-0 hover:bg-red-100 dark:hover:bg-red-900 rounded-full"
+                    >
+                      <X className="h-3 w-3 text-red-600" />
+                    </Button>
+                  </Badge>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Working Directory */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Working Directory
-            </label>
-            <input
-              type="text"
-              value={plistData.workingDirectory}
-              onChange={(e) => setPlistData(prev => ({ ...prev, workingDirectory: e.target.value }))}
-              placeholder="/path/to/working/directory"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            />
+          {/* Working Directory Section */}
+          <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-slate-700 dark:to-slate-600 rounded-xl p-6 border-2 border-emerald-200 dark:border-slate-500">
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <FolderOpen className="h-6 w-6" /> Working Directory
+            </h3>
+            <div className="space-y-2">
+              <Input
+                id="working-dir"
+                type="text"
+                value={plistData.workingDirectory}
+                onChange={(e) => setPlistData(prev => ({ ...prev, workingDirectory: e.target.value }))}
+                placeholder="/path/to/working/directory"
+                className="border-2 focus:border-emerald-500 transition-all duration-300"
+              />
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <Lightbulb className="h-3 w-3" /> Optional: Directory where the program should run
+              </p>
+            </div>
           </div>
 
-          {/* Checkboxes */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="runAtLoad"
-                checked={plistData.runAtLoad}
-                onChange={(e) => setPlistData(prev => ({ ...prev, runAtLoad: e.target.checked }))}
-                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-              />
-              <label htmlFor="runAtLoad" className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                Run at Load
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="keepAlive"
-                checked={plistData.keepAlive}
-                onChange={(e) => setPlistData(prev => ({ ...prev, keepAlive: e.target.checked }))}
-                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-              />
-              <label htmlFor="keepAlive" className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                Keep Alive
-              </label>
+          {/* Service Options Section */}
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-slate-700 dark:to-slate-600 rounded-xl p-6 border-2 border-amber-200 dark:border-slate-500">
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Settings className="h-6 w-6" /> Service Options
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex items-center space-x-3 p-4 bg-white/50 dark:bg-slate-800/50 rounded-lg border">
+                <Checkbox
+                  id="runAtLoad"
+                  checked={plistData.runAtLoad}
+                  onCheckedChange={(checked) => setPlistData(prev => ({ ...prev, runAtLoad: !!checked }))}
+                  className="border-2"
+                />
+                <div>
+                  <Label htmlFor="runAtLoad" className="font-semibold flex items-center gap-2">
+                    <Play className="h-4 w-4" /> Run at Load
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Start service when system boots
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3 p-4 bg-white/50 dark:bg-slate-800/50 rounded-lg border">
+                <Checkbox
+                  id="keepAlive"
+                  checked={plistData.keepAlive}
+                  onCheckedChange={(checked) => setPlistData(prev => ({ ...prev, keepAlive: !!checked }))}
+                  className="border-2"
+                />
+                <div>
+                  <Label htmlFor="keepAlive" className="font-semibold flex items-center gap-2">
+                    <RotateCcw className="h-4 w-4" /> Keep Alive
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Restart if service crashes
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Log Paths */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Standard Output Path
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="stdout-path">Standard Output Path</Label>
+              <Input
+                id="stdout-path"
                 type="text"
                 value={plistData.standardOutPath}
                 onChange={(e) => setPlistData(prev => ({ ...prev, standardOutPath: e.target.value }))}
                 placeholder="/tmp/myservice.out"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Standard Error Path
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="stderr-path">Standard Error Path</Label>
+              <Input
+                id="stderr-path"
                 type="text"
                 value={plistData.standardErrorPath}
                 onChange={(e) => setPlistData(prev => ({ ...prev, standardErrorPath: e.target.value }))}
                 placeholder="/tmp/myservice.err"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
             </div>
           </div>
 
           {/* Environment Variables */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Environment Variables
-            </label>
-            <div className="flex gap-2 mb-2">
-              <input
+          <div className="space-y-2">
+            <Label>Environment Variables</Label>
+            <div className="flex gap-2">
+              <Input
                 type="text"
                 value={envKey}
                 onChange={(e) => setEnvKey(e.target.value)}
                 placeholder="KEY"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="flex-1"
               />
-              <input
+              <Input
                 type="text"
                 value={envValue}
                 onChange={(e) => setEnvValue(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && addEnvironmentVariable()}
                 placeholder="value"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="flex-1"
               />
-              <button
-                onClick={addEnvironmentVariable}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              >
+              <Button onClick={addEnvironmentVariable} className="bg-green-600 hover:bg-green-700">
                 Add
-              </button>
+              </Button>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 mt-2">
               {Object.entries(plistData.environmentVariables).map(([key, value]) => (
-                <div key={key} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
-                  <span className="text-sm text-gray-900 dark:text-gray-100">
+                <div key={key} className="flex items-center justify-between p-2 bg-muted rounded">
+                  <span className="text-sm">
                     <strong>{key}</strong> = {value}
                   </span>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => removeEnvironmentVariable(key)}
-                    className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
+                    className="h-auto p-1 hover:bg-destructive hover:text-destructive-foreground"
                   >
-                    ×
-                  </button>
+                    <X className="h-3 w-3" />
+                  </Button>
                 </div>
               ))}
             </div>
           </div>
         </div>
-
-        {/* Actions */}
-        <div className="p-6 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <button
+        {/* Actions Section */}
+        <div className="pt-8 border-t-2 border-dashed">
+          <div className="flex flex-col gap-6">
+            <Button
               onClick={downloadPlist}
               disabled={!isValid}
-              className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 py-3 text-lg font-semibold"
+              size="lg"
             >
+              <Download className="h-5 w-5 mr-2" />
               Download Plist File
-            </button>
+            </Button>
             {isValid && (
-              <div className="flex-1">
-                <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg mb-2">
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Installation command:</p>
-                  <code className="text-xs text-gray-800 dark:text-gray-200 font-mono break-all">
-                    {getInstallCommand()}
-                  </code>
+              <div className="relative">
+                <div className="bg-slate-900 dark:bg-slate-950 rounded-lg border border-slate-300 dark:border-slate-600 overflow-hidden">
+                  {/* Code block header */}
+                  <div className="flex items-center justify-between px-4 py-2 bg-slate-100 dark:bg-slate-800 border-b border-slate-300 dark:border-slate-600">
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-1.5">
+                        <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                      </div>
+                      <span className="text-sm font-medium text-slate-600 dark:text-slate-300 ml-2">
+                        Installation Command
+                      </span>
+                    </div>
+                    <Button
+                      onClick={copyInstallCommand}
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 hover:bg-slate-200 dark:hover:bg-slate-700"
+                    >
+                      <Copy className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  {/* Code content */}
+                  <div className="p-4">
+                    <code className="text-sm font-mono text-green-400 dark:text-green-300 block leading-relaxed">
+                      {getInstallCommand()}
+                    </code>
+                  </div>
                 </div>
-                <button
-                  onClick={copyInstallCommand}
-                  className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
-                >
-                  Copy Install Command
-                </button>
               </div>
             )}
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

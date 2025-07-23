@@ -2,6 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tag, Plus, Loader2, Lightbulb, Briefcase, Calendar, Trash2 } from 'lucide-react';
 
 interface ServiceLabel {
   id: number;
@@ -86,99 +92,150 @@ export default function LabelsManagement() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Maas - Manage Labels
-          </h1>
-          <Link
-            href="/"
-            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-          >
-            Back to Services
-          </Link>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-teal-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <div className="container mx-auto px-6 py-12">
+        {/* Header Section */}
+        <div className="mb-12">
+          <div className="text-center mb-8">
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-emerald-600 via-teal-600 to-green-600 bg-clip-text text-transparent mb-4 flex items-center justify-center gap-3">
+              <Tag className="h-12 w-12 text-emerald-600" /> Labels
+            </h1>
+            <p className="text-xl text-muted-foreground font-medium">
+              Organize & Filter Your Services
+            </p>
+          </div>
+          <div className="flex justify-center">
+            <Button asChild variant="outline" className="border-2 hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-all duration-300 px-6 py-3" size="lg">
+              <Link href="/">
+                ← Back to Services
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {error && (
-          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-            Error: {error}
-          </div>
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>
+              Error: {error}
+            </AlertDescription>
+          </Alert>
         )}
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-            Add New Label
-          </h2>
-          <form onSubmit={addLabel} className="flex gap-4">
-            <input
-              type="text"
-              value={newLabel}
-              onChange={(e) => setNewLabel(e.target.value)}
-              placeholder="Enter label name (e.g., 'docker', 'database', 'web')"
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              disabled={adding}
-            />
-            <button
-              type="submit"
-              disabled={adding || !newLabel.trim()}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {adding ? 'Adding...' : 'Add Label'}
-            </button>
-          </form>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Labels are used to filter services on the main page. Add keywords that appear in service names you want to group together.
-          </p>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Saved Labels ({labels.length})
-            </h2>
-          </div>
-
-          {loading && labels.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600 dark:text-gray-400">Loading labels...</p>
-            </div>
-          ) : labels.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-600 dark:text-gray-400">
-                No labels saved yet. Add your first label above to start filtering services.
+        {/* Add New Label Section */}
+        <Card className="mb-8 shadow-xl border-0 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-slate-800 dark:to-slate-700">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-2xl font-bold flex items-center gap-2">
+              <Plus className="h-6 w-6" /> Add New Label
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={addLabel} className="flex gap-4 mb-4">
+              <Input
+                type="text"
+                value={newLabel}
+                onChange={(e) => setNewLabel(e.target.value)}
+                placeholder="Enter label name (e.g., 'docker', 'database', 'web')"
+                disabled={adding}
+                className="flex-1 text-lg py-3 px-4 border-2 focus:border-emerald-500 transition-all duration-300"
+              />
+              <Button
+                type="submit"
+                disabled={adding || !newLabel.trim()}
+                className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all duration-300 px-6"
+                size="lg"
+              >
+                {adding ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Label
+                  </>
+                )}
+              </Button>
+            </form>
+            <div className="bg-white/50 dark:bg-slate-800/50 rounded-lg p-4 border border-emerald-200 dark:border-slate-600">
+              <p className="text-sm text-muted-foreground flex items-center gap-2">
+                <Lightbulb className="h-4 w-4" /> <strong>Tip:</strong> Labels are used to filter services on the main page. Add keywords that appear in service names you want to group together.
               </p>
             </div>
-          ) : (
-            <div className="divide-y divide-gray-200 dark:divide-gray-700">
-              {labels.map((label) => (
-                <div key={label.id} className="px-6 py-4 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                      {label.label}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Created: {new Date(label.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => removeLabel(label.id)}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+          </CardContent>
+        </Card>
 
-        <div className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>
-            Labels help you quickly filter services by keywords. When you select labels on the main page,
-            only services containing those keywords will be displayed.
-          </p>
+        {/* Saved Labels Section */}
+        <Card className="shadow-2xl border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-2xl font-bold flex items-center gap-2">
+              <Briefcase className="h-6 w-6" /> Saved Labels ({labels.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading && labels.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="relative">
+                    <Skeleton className="h-16 w-16 rounded-full" />
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 opacity-20 animate-pulse"></div>
+                  </div>
+                  <p className="text-lg text-muted-foreground font-medium">Loading labels...</p>
+                </div>
+              </div>
+            ) : labels.length === 0 ? (
+              <div className="text-center py-16">
+                <Tag className="h-16 w-16 mb-4 opacity-50" />
+                <p className="text-lg text-muted-foreground font-medium">
+                  No labels saved yet. Add your first label above to start filtering services.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {labels.map((label, index) => (
+                  <div key={label.id} className={`p-6 rounded-xl border-2 transition-all duration-300 hover:shadow-lg ${
+                    index % 2 === 0 
+                      ? 'bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-slate-700 dark:to-slate-600 border-emerald-200 dark:border-slate-600' 
+                      : 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-600 dark:to-slate-700 border-blue-200 dark:border-slate-500'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-3 h-3 rounded-full ${
+                          index % 2 === 0 ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500'
+                        }`}></div>
+                        <div>
+                          <h3 className="text-xl font-bold flex items-center gap-2">
+                            <Tag className="h-5 w-5" /> {label.label}
+                          </h3>
+                          <p className="text-sm text-muted-foreground flex items-center gap-1">
+                            <Calendar className="h-4 w-4" /> Created: {new Date(label.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => removeLabel(label.id)}
+                        variant="destructive"
+                        size="sm"
+                        className="hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Info Section */}
+        <div className="mt-8 text-center">
+          <div className="inline-flex items-center gap-2 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg border">
+            <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <Lightbulb className="h-4 w-4" /> Labels help you quickly filter services by keywords. Select labels on the main page to filter services.
+            </span>
+          </div>
         </div>
       </div>
     </div>
