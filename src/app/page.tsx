@@ -21,6 +21,8 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [savedLabels, setSavedLabels] = useState<ServiceLabel[]>([]);
   const [selectedLabels, setSelectedLabels] = useState<Set<string>>(new Set());
+  const [showAllServices, setShowAllServices] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchServices = async () => {
     try {
@@ -47,6 +49,12 @@ export default function Home() {
       }
       const data = await response.json();
       setSavedLabels(data.labels);
+      
+      // Set all saved labels as selected by default (show only saved labels)
+      if (!showAllServices && data.labels.length > 0) {
+        const allSavedLabels = new Set(data.labels.map((label: ServiceLabel) => label.label));
+        setSelectedLabels(allSavedLabels);
+      }
     } catch (err) {
       console.error('Error fetching labels:', err);
     }
@@ -64,15 +72,37 @@ export default function Home() {
 
   const clearFilters = () => {
     setSelectedLabels(new Set());
+    setShowAllServices(true);
   };
 
-  const filteredServices = selectedLabels.size === 0 
-    ? services 
-    : services.filter(service => 
-        Array.from(selectedLabels).some(selectedLabel => 
-          service.label.toLowerCase().includes(selectedLabel.toLowerCase())
-        )
+  const toggleAllServices = () => {
+    if (showAllServices) {
+      // Switch to showing only saved labels
+      const allSavedLabels = new Set(savedLabels.map(label => label.label));
+      setSelectedLabels(allSavedLabels);
+      setShowAllServices(false);
+    } else {
+      // Switch to showing all services
+      setSelectedLabels(new Set());
+      setShowAllServices(true);
+    }
+  };
+
+  const filteredServices = services.filter(service => {
+    // Apply label filtering - only filter if labels are selected
+    const labelMatch = selectedLabels.size === 0 || 
+      Array.from(selectedLabels).some(selectedLabel => 
+        service.label.toLowerCase().includes(selectedLabel.toLowerCase())
       );
+    
+    // Apply search filtering
+    const searchMatch = !searchQuery || 
+      service.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      service.pid.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (service.pid !== 'Not Running' ? 'running' : 'stopped').includes(searchQuery.toLowerCase());
+    
+    return labelMatch && searchMatch;
+  });
 
   useEffect(() => {
     fetchServices();
@@ -84,7 +114,7 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            macOS Services (launchctl)
+            MaaS - Mac as a Server
           </h1>
           <div className="flex gap-4">
             <Link
@@ -103,20 +133,44 @@ export default function Home() {
           </div>
         </div>
 
+        <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <label htmlFor="search" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Search Services
+              </label>
+              <input
+                id="search"
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by service name, PID, or status..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
+              />
+            </div>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="mt-6 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+
         {savedLabels.length > 0 && (
           <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Filter by Labels
               </h2>
-              {selectedLabels.size > 0 && (
-                <button
-                  onClick={clearFilters}
-                  className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                >
-                  Clear all ({selectedLabels.size})
-                </button>
-              )}
+              <button
+                onClick={toggleAllServices}
+                className="text-sm px-3 py-1 rounded-md bg-gray-600 text-white hover:bg-gray-700"
+              >
+                {showAllServices ? 'Reset to Saved Labels' : 'Clear Label Selection'}
+              </button>
             </div>
             <div className="flex flex-wrap gap-2">
               {savedLabels.map((label) => (
@@ -194,7 +248,10 @@ export default function Home() {
 
         <div className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
           Showing {filteredServices.length} of {services.length} services
-          {selectedLabels.size > 0 && (
+          {searchQuery && (
+            <span className="ml-2">(searched for "{searchQuery}")</span>
+          )}
+          {!searchQuery && selectedLabels.size > 0 && (
             <span className="ml-2">
               (filtered by {selectedLabels.size} label{selectedLabels.size !== 1 ? 's' : ''})
             </span>
