@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import PlistGenerator from '../components/PlistGenerator';
 
 interface LaunchService {
   pid: string;
@@ -23,6 +24,7 @@ export default function Home() {
   const [selectedLabels, setSelectedLabels] = useState<Set<string>>(new Set());
   const [showAllServices, setShowAllServices] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showPlistGenerator, setShowPlistGenerator] = useState(false);
 
   const fetchServices = async () => {
     try {
@@ -117,6 +119,12 @@ export default function Home() {
             MaaS - Mac as a Server
           </h1>
           <div className="flex gap-4">
+            <button
+              onClick={() => setShowPlistGenerator(true)}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            >
+              Create Plist
+            </button>
             <Link
               href="/labels"
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
@@ -257,6 +265,11 @@ export default function Home() {
             </span>
           )}
         </div>
+
+        <PlistGenerator
+          isOpen={showPlistGenerator}
+          onClose={() => setShowPlistGenerator(false)}
+        />
       </div>
     </div>
   );
