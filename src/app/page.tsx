@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Sparkles, Tag, RefreshCw, Search, X, Target, RotateCcw, Monitor, BarChart3, ExternalLink } from 'lucide-react';
+import { Sparkles, Tag, RefreshCw, Search, X, Target, RotateCcw, Monitor, BarChart3, ExternalLink, Globe, AppleIcon } from 'lucide-react';
 
 interface LaunchService {
   pid: string;
@@ -35,6 +35,8 @@ export default function Home() {
   const [showAllServices, setShowAllServices] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showPlistGenerator, setShowPlistGenerator] = useState(false);
+  const [filterByNetworkUrl, setFilterByNetworkUrl] = useState(false);
+  const [hideAppleServices, setHideAppleServices] = useState(true);
 
   const fetchServices = async () => {
     try {
@@ -100,7 +102,8 @@ export default function Home() {
     }
   };
 
-  const filteredServices = services.filter(service => {
+  // First apply non-network URL filters to get the base filtered set
+  const baseFilteredServices = services.filter(service => {
     // Apply label filtering - only filter if labels are selected
     const labelMatch = selectedLabels.size === 0 || 
       Array.from(selectedLabels).some(selectedLabel => 
@@ -113,7 +116,18 @@ export default function Home() {
       service.pid.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (service.pid !== 'Not Running' ? 'running' : 'stopped').includes(searchQuery.toLowerCase());
     
-    return labelMatch && searchMatch;
+    // Apply Apple services filtering
+    const appleServiceMatch = !hideAppleServices || !service.label.startsWith('com.apple') && !service.label.startsWith('application.com.apple');
+    
+    return labelMatch && searchMatch && appleServiceMatch;
+  });
+  
+  // Check if any of the currently visible services have network URLs
+  const hasNetworkUrls = baseFilteredServices.some(service => service.networkUrl);
+  
+  // Now apply the network URL filter if active
+  const filteredServices = baseFilteredServices.filter(service => {
+    return !filterByNetworkUrl || service.networkUrl;
   });
 
   useEffect(() => {
@@ -173,85 +187,88 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Search Section */}
-        <Card className="mb-8 shadow-xl border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
-          <CardContent className="p-8">
-            <div className="flex items-center gap-6">
-              <div className="flex-1">
-                <Label htmlFor="search" className="text-lg font-semibold mb-3 block flex items-center gap-2">
-                  <Search className="h-5 w-5" /> Search Services
-                </Label>
-                <Input
-                  id="search"
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search by service name, PID, or status..."
-                  className="text-lg py-3 px-4 border-2 focus:border-blue-500 transition-all duration-300"
-                />
-              </div>
-              {searchQuery && (
-                <Button
-                  onClick={() => setSearchQuery('')}
-                  variant="ghost"
-                  className="mt-9 hover:bg-red-50 hover:text-red-600 transition-all duration-300"
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Clear
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Labels Filter Section */}
-        {savedLabels.length > 0 && (
-          <Card className="mb-8 shadow-xl border-0 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700">
-            <CardHeader className="pb-4">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xl font-semibold flex items-center gap-2">
-                  <Target className="h-5 w-5" /> Filter by Labels
-                </CardTitle>
-                <Button
-                  onClick={toggleAllServices}
-                  variant="outline"
-                  size="sm"
-                  className="hover:bg-white dark:hover:bg-slate-600 transition-all duration-300"
-                >
-                  {showAllServices ? (
-                    <>
-                      <RotateCcw className="h-4 w-4 mr-2" />
-                      Reset to Saved Labels
-                    </>
-                  ) : (
-                    <>
-                      <X className="h-4 w-4 mr-2" />
-                      Clear Selection
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-3">
-                {savedLabels.map((label) => (
-                  <Badge
-                    key={label.id}
-                    variant={selectedLabels.has(label.label) ? "default" : "secondary"}
-                    className={`cursor-pointer text-sm py-2 px-4 hover:scale-105 hover:shadow-md ${
-                      selectedLabels.has(label.label) 
-                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg' 
-                        : 'hover:bg-slate-200 dark:hover:bg-slate-600'
-                    }`}
-                    onClick={() => toggleLabel(label.label)}
+        {/* Search and Filter Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Search Section */}
+          <Card className="shadow-xl border-0 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
+            <CardContent className="p-8">
+              <div className="flex items-center gap-6">
+                <div className="flex-1">
+                  <Label htmlFor="search" className="text-lg font-semibold mb-3 block flex items-center gap-2">
+                    <Search className="h-5 w-5" /> Search Services
+                  </Label>
+                  <Input
+                    id="search"
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search by service name, PID, or status..."
+                    className="text-lg py-3 px-4 border-2 focus:border-blue-500 transition-all duration-300"
+                  />
+                </div>
+                {searchQuery && (
+                  <Button
+                    onClick={() => setSearchQuery('')}
+                    variant="ghost"
+                    className="mt-9 hover:bg-red-50 hover:text-red-600 transition-all duration-300"
                   >
-                    {label.label}
-                  </Badge>
-                ))}
+                    <X className="h-4 w-4 mr-2" />
+                    Clear
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
-        )}
+
+          {/* Labels Filter Section */}
+          {savedLabels.length > 0 && (
+            <Card className="shadow-xl border-0 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl font-semibold flex items-center gap-2">
+                    <Target className="h-5 w-5" /> Filter by Labels
+                  </CardTitle>
+                  <Button
+                    onClick={toggleAllServices}
+                    variant="outline"
+                    size="sm"
+                    className="hover:bg-white dark:hover:bg-slate-600 transition-all duration-300"
+                  >
+                    {showAllServices ? (
+                      <>
+                        <RotateCcw className="h-4 w-4 mr-2" />
+                        Reset to Saved Labels
+                      </>
+                    ) : (
+                      <>
+                        <X className="h-4 w-4 mr-2" />
+                        Clear Selection
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-3">
+                  {savedLabels.map((label) => (
+                    <Badge
+                      key={label.id}
+                      variant={selectedLabels.has(label.label) ? "default" : "secondary"}
+                      className={`cursor-pointer text-sm py-2 px-4 hover:scale-105 hover:shadow-md ${
+                        selectedLabels.has(label.label) 
+                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg' 
+                          : 'hover:bg-slate-200 dark:hover:bg-slate-600'
+                      }`}
+                      onClick={() => toggleLabel(label.label)}
+                    >
+                      {label.label}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
         {error && (
           <Alert variant="destructive" className="mb-4">
@@ -277,14 +294,46 @@ export default function Home() {
         ) : (
           <Card className="shadow-2xl border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
-              <CardTitle className="text-2xl font-bold flex items-center gap-2">
-                <Monitor className="h-6 w-6" /> System Services
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                  <Monitor className="h-6 w-6" /> System Services
+                </CardTitle>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => setHideAppleServices(!hideAppleServices)}
+                    variant={hideAppleServices ? "default" : "outline"}
+                    size="sm"
+                    className={hideAppleServices 
+                      ? 'hover:scale-105 hover:shadow-md bg-gradient-to-r from-red-600 to-pink-600'
+                      : 'hover:bg-blue-50 dark:hover:bg-blue-950'
+                    }
+                  >
+                    <AppleIcon className="h-4 w-4 mr-2" />
+                    {hideAppleServices ? 'Show Apple Services' : 'Hide Apple Services'}
+                  </Button>
+                  <Button
+                    onClick={() => setFilterByNetworkUrl(!filterByNetworkUrl)}
+                    variant={filterByNetworkUrl ? "default" : "outline"}
+                    size="sm"
+                    disabled={!hasNetworkUrls}
+                    className={`${
+                      !hasNetworkUrls 
+                        ? 'opacity-50 cursor-not-allowed' 
+                        : filterByNetworkUrl 
+                          ? 'hover:scale-105 hover:shadow-md bg-gradient-to-r from-orange-600 to-violet-600'
+                          : 'hover:bg-blue-50 dark:hover:bg-blue-950'
+                    }`}
+                  >
+                    <Globe className="h-4 w-4 mr-2" />
+                    {filterByNetworkUrl ? 'Show All' : 'Network URLs Only'}
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
+              <div className="max-h-[60vh] overflow-auto">
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="sticky top-0 bg-white dark:bg-slate-800 z-10">
                     <TableRow className="border-b-2">
                       <TableHead className="text-base font-semibold py-4">Status</TableHead>
                       <TableHead className="text-base font-semibold py-4">PID</TableHead>
@@ -301,7 +350,7 @@ export default function Home() {
                             className={`text-sm py-1 px-3 font-medium ${
                               service.pid !== 'Not Running' 
                                 ? 'bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 shadow-sm' 
-                                : 'bg-gradient-to-r from-slate-400 to-gray-400'
+                                : 'bg-gradient-to-r from-slate-400 to-gray-400 text-white'
                             }`}
                           >
                             {service.pid !== 'Not Running' ? 'Running' : 'Stopped'}

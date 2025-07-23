@@ -280,7 +280,7 @@ export default function PlistGenerator({ isOpen, onClose }: PlistGeneratorProps)
                   className="border-2"
                 />
                 <div>
-                  <Label htmlFor="runAtLoad" className="font-semibold flex items-center gap-2">
+                  <Label htmlFor="runAtLoad" className="font-semibold flex items-center gap-2 pb-2">
                     <Play className="h-4 w-4" /> Run at Load
                   </Label>
                   <p className="text-xs text-muted-foreground">
@@ -296,7 +296,7 @@ export default function PlistGenerator({ isOpen, onClose }: PlistGeneratorProps)
                   className="border-2"
                 />
                 <div>
-                  <Label htmlFor="keepAlive" className="font-semibold flex items-center gap-2">
+                  <Label htmlFor="keepAlive" className="font-semibold flex items-center gap-2 pb-2">
                     <RotateCcw className="h-4 w-4" /> Keep Alive
                   </Label>
                   <p className="text-xs text-muted-foreground">
@@ -379,7 +379,7 @@ export default function PlistGenerator({ isOpen, onClose }: PlistGeneratorProps)
             <Button
               onClick={downloadPlist}
               disabled={!isValid}
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 py-3 text-lg font-semibold"
+              className="cursor-pointer text-sm py-2 px-4 hover:scale-105 hover:shadow-md bg-gradient-to-r from-emerald-600 to-teal-600"
               size="lg"
             >
               <Download className="h-5 w-5 mr-2" />
