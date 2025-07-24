@@ -47,6 +47,8 @@ cat > "$PLIST_FILE" << EOF
     <array>
         <string>$BUN_PATH</string>
         <string>dev</string>
+        <string>--port</string>
+        <string>6543</string>
     </array>
     <key>WorkingDirectory</key>
     <string>$PROJECT_DIR</string>
@@ -58,6 +60,11 @@ cat > "$PLIST_FILE" << EOF
     <string>/tmp/maas.log</string>
     <key>StandardErrorPath</key>
     <string>/tmp/maas.error.log</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PORT</key>
+        <string>6543</string>
+    </dict>
 </dict>
 </plist>
 EOF
