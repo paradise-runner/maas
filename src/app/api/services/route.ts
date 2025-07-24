@@ -25,20 +25,16 @@ async function getNetworkPortMapping(): Promise<Map<string, string>> {
   try {
     // Get current IP address
     const { stdout: ipOutput } = await execAsync('/sbin/ifconfig | grep "inet " | grep -v 127.0.0.1 | awk \'{print $2}\'');
-    await writeDebugLog(`IP Output:\n${ipOutput}`);
     const { stdout: ipErrorOutput } = await execAsync('/sbin/ifconfig');
-    await writeDebugLog(`IP Error Output:\n${ipErrorOutput}`);
     
     const ipAddress = ipOutput.trim().split('\n')[0];
     if (!ipAddress) return portMap;
     
     // Get processes listening on ports
     const { stdout: lsofOutput } = await execAsync('/usr/sbin/lsof -iTCP -sTCP:LISTEN -n -P');
-    await writeDebugLog(`LSOF Output:\n${lsofOutput}`);
     
     // Get process hierarchy information
     const { stdout: psOutput } = await execAsync('ps -efj');
-    await writeDebugLog(`PS Output:\n${psOutput}`);
     
     const lsofLines = lsofOutput.split('\n').slice(1);
     const psLines = psOutput.split('\n').slice(1);
@@ -100,7 +96,7 @@ async function getNetworkPortMapping(): Promise<Map<string, string>> {
       }
     }
   } catch (error) {
-    await writeDebugLog(`Error getting network port mapping: ${error}`);
+    console.error('Error fetching network port mapping:', error);
   }
   
   return portMap;
