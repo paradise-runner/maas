@@ -46,6 +46,29 @@ MaaS provides a clean, intuitive web interface to view and filter macOS system s
 
 ## Installation
 
+### Quick Start (Recommended)
+
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd maas
+   ```
+
+2. **Run the initialization script:**
+   ```bash
+   ./init-maas.sh
+   ```
+   
+   This script will:
+   - ✅ Check that bun is available
+   - 🏠 Get your user home directory
+   - 🔍 Locate bun installation path
+   - 📝 Generate a macOS LaunchAgent plist file
+   - 🔄 Load and start the MAAS service automatically
+   - 🌐 Open the application in your default browser
+
+### Manual Installation
+
 1. **Clone the repository:**
    ```bash
    git clone <repository-url>
@@ -116,6 +139,9 @@ maas/
 ## Available Scripts
 
 ```bash
+# Quick Setup
+./init-maas.sh       # Initialize and run MAAS as a LaunchAgent service
+
 # Development
 bun run dev          # Start development server with Turbopack
 
@@ -125,6 +151,13 @@ bun run start        # Start production server
 
 # Code Quality
 bun run lint         # Run ESLint
+
+# Service Management (after using init-maas.sh)
+launchctl list | grep com.maas.dev     # Check service status
+tail -f /tmp/maas.log                   # View application logs
+launchctl stop com.maas.dev            # Stop the service
+launchctl start com.maas.dev           # Start the service
+launchctl unload ~/Library/LaunchAgents/com.maas.dev.plist  # Uninstall service
 ```
 
 ## Technology Stack
