@@ -54,6 +54,7 @@ cat > "$PLIST_FILE" << EOF
     <key>ProgramArguments</key>
     <array>
         <string>$BUN_PATH</string>
+        <string>--bun</string>
         <string>dev</string>
         <string>--port</string>
         <string>6543</string>
