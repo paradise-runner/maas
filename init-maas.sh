@@ -26,6 +26,14 @@ echo "🔍 bun location: $BUN_PATH"
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo "📁 Project directory: $PROJECT_DIR"
 
+# Run `bun install` to ensure all dependencies are installed
+echo "🔧 Running 'bun install' in project directory..."
+if ! bun install; then
+    echo "❌ Error: 'bun install' failed. Please check your project dependencies."
+    exit 1
+fi
+echo "✅ Dependencies installed successfully"
+
 # Step 4: Generate plist file for maas
 PLIST_LABEL="com.maas.dev"
 PLIST_FILE="$USER_HOME/Library/LaunchAgents/$PLIST_LABEL.plist"
