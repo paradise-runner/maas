@@ -1,8 +1,16 @@
-import Database from 'better-sqlite3';
 import path from 'path';
 
 const dbPath = path.join(process.cwd(), 'data', 'maas.db');
-const db = new Database(dbPath);
+
+let db: any;
+
+if (typeof Bun !== 'undefined') {
+  const { Database } = require('bun:sqlite');
+  db = new Database(dbPath);
+} else {
+  const Database = require('better-sqlite3');
+  db = new Database(dbPath);
+}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS service_labels (
