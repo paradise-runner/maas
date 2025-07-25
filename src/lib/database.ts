@@ -4,13 +4,8 @@ const dbPath = path.join(process.cwd(), 'data', 'maas.db');
 
 let db: any;
 
-if (typeof Bun !== 'undefined') {
-  const { Database } = require('bun:sqlite');
-  db = new Database(dbPath);
-} else {
-  const Database = require('better-sqlite3');
-  db = new Database(dbPath);
-}
+import { Database } from "bun:sqlite";
+db = new Database(dbPath);
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS service_labels (
