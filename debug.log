@@ -1,0 +1,15 @@
+[2025-11-15T16:11:43.001Z] Restart requested for label: com.homefried.dev
+[2025-11-15T16:11:43.001Z] Running command: launchctl stop com.homefried.dev && launchctl start com.homefried.dev
+[2025-11-15T16:11:43.022Z] stdout: 
+[2025-11-15T16:11:44.301Z] Restart requested for label: com.homefried.dev
+[2025-11-15T16:11:44.301Z] Running command: launchctl stop com.homefried.dev && launchctl start com.homefried.dev
+[2025-11-15T16:11:44.316Z] stdout: 
+[2025-11-15T16:11:51.891Z] Restart requested for label: com.anthropic.claudefordesktop.ShipIt
+[2025-11-15T16:11:51.891Z] Running command: launchctl stop com.anthropic.claudefordesktop.ShipIt && launchctl start com.anthropic.claudefordesktop.ShipIt
+[2025-11-15T16:11:51.911Z] stdout: 
+[2025-11-15T16:11:53.253Z] Restart requested for label: com.anthropic.claudefordesktop.ShipIt
+[2025-11-15T16:11:53.253Z] Running command: launchctl stop com.anthropic.claudefordesktop.ShipIt && launchctl start com.anthropic.claudefordesktop.ShipIt
+[2025-11-15T16:11:53.274Z] stdout: 
+[2025-11-15T16:11:56.270Z] Restart requested for label: com.anthropic.claudefordesktop.ShipIt
+[2025-11-15T16:11:56.271Z] Running command: launchctl stop com.anthropic.claudefordesktop.ShipIt && launchctl start com.anthropic.claudefordesktop.ShipIt
+[2025-11-15T16:11:56.291Z] stdout: 
