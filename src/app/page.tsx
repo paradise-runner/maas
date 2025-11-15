@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Sparkles, Tag, RefreshCw, Search, X, Target, RotateCcw, Monitor, BarChart3, ExternalLink, Globe, AppleIcon } from 'lucide-react';
+import ServicePlistHover from '@/components/ServicePlistHover';
 
 interface LaunchService {
   pid: string;
@@ -360,7 +361,10 @@ export default function Home() {
                           {service.pid}
                         </TableCell>
                         <TableCell className="font-mono text-sm py-4 font-medium flex items-center justify-between">
-                          <span className="mr-4">{service.label}</span>
+                          <div className="flex items-center">
+                              <ServicePlistHover label={service.label} />
+                              <span className="mr-4">{service.label}</span>
+                            </div>
                           <div className="ml-2">
                             <Button
                               size="sm"
