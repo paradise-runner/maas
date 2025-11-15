@@ -142,3 +142,35 @@ export async function GET() {
     );
   }
 }
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const label = typeof body?.label === 'string' ? body.label.trim() : '';
+
+    if (!label) {
+      return NextResponse.json({ error: 'Missing service label' }, { status: 400 });
+    }
+
+    // Validate label to avoid shell injection (allow common label characters)
+    if (!/^[A-Za-z0-9._:-]+$/.test(label)) {
+      return NextResponse.json({ error: 'Invalid service label' }, { status: 400 });
+    }
+
+    await writeDebugLog(`Restart requested for label: ${label}`);
+
+    // Stop then start the launchctl service to pick up changes
+    const cmd = `launchctl stop ${label} && launchctl start ${label}`;
+    await writeDebugLog(`Running command: ${cmd}`);
+
+    const { stdout, stderr } = await execAsync(cmd);
+    await writeDebugLog(`stdout: ${stdout}`);
+    if (stderr) await writeDebugLog(`stderr: ${stderr}`);
+
+    return NextResponse.json({ ok: true, stdout, stderr });
+  } catch (error) {
+    console.error('Error restarting service:', error);
+    await writeDebugLog(`Error restarting service: ${String(error)}`);
+    return NextResponse.json({ error: 'Failed to restart service' }, { status: 500 });
+  }
+}

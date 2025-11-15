@@ -359,8 +359,37 @@ export default function Home() {
                         <TableCell className="font-mono text-sm py-4 font-medium">
                           {service.pid}
                         </TableCell>
-                        <TableCell className="font-mono text-sm py-4 font-medium">
-                          {service.label}
+                        <TableCell className="font-mono text-sm py-4 font-medium flex items-center justify-between">
+                          <span className="mr-4">{service.label}</span>
+                          <div className="ml-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={async () => {
+                                try {
+                                  // Optimistic UI: show loading state via button disabled
+                                  const resp = await fetch('/api/services', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ label: service.label })
+                                  });
+                                  if (!resp.ok) {
+                                    const err = await resp.json();
+                                    throw new Error(err?.error || 'Failed to restart');
+                                  }
+                                  // Refresh services after restart
+                                  await fetchServices();
+                                } catch (err) {
+                                  console.error('Restart error:', err);
+                                  alert(err instanceof Error ? err.message : 'Failed to restart service');
+                                }
+                              }}
+                              className="hover:scale-105 hover:shadow-sm"
+                            >
+                              <RotateCcw className="h-4 w-4 mr-2" />
+                              Restart
+                            </Button>
+                          </div>
                         </TableCell>
                         <TableCell className="py-4">
                           {service.networkUrl ? (
